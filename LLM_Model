@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from transformers import AutoModelForCausalLM, AutoTokenizer
+import torch
 
 app = Flask(__name__)
 
@@ -10,15 +11,22 @@ model = AutoModelForCausalLM.from_pretrained(model_name)
 
 @app.route('/infer', methods=['POST'])
 def infer():
-    data = request.json
-    input_text = data['text']
+    try:
+        data = request.json
+        input_text = data.get('text', '')
 
-    # Generate AI response
-    inputs = tokenizer(input_text, return_tensors="pt")
-    output = model.generate(**inputs, max_length=100)
-    response_text = tokenizer.decode(output[0], skip_special_tokens=True)
+        if not input_text:
+            return jsonify({'error': 'No input text provided'}), 400
 
-    return jsonify({'response': response_text})
+        # Generate AI response
+        inputs = tokenizer(input_text, return_tensors="pt")
+        output = model.generate(**inputs, max_length=100)
+        response_text = tokenizer.decode(output[0], skip_special_tokens=True)
 
-# Start the Flask server in Colab
-app.run(port=5000)
+        return jsonify({'response': response_text})
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+if __name__ == '__main__':
+    app.run(port=5000)
