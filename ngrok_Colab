@@ -1,7 +1,11 @@
+!pip install python-telegram-bot transformers torch flask ngrok
+
+
 !pip install pyngrok flask transformers torch
+!pip install pyngrok --upgrade
+!ngrok authtoken ...
+
 from pyngrok import ngrok
 
-# Replace with your actual ngrok auth token
-ngrok.set_auth_token("NGROK_AUTH_TOKEN")
 public_url = ngrok.connect(5000).public_url
 print(f"Your public ngrok URL is: {public_url}")
